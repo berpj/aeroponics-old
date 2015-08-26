@@ -1,0 +1,1 @@
+* * * * * (/usr/bin/raspistill -q 15 --nopreview -w 1920 -h 1080 -o /var/www/pic.jpg~ && mv /var/www/pic.jpg~ /var/www/pic.jpg ; /home/pi/save_pic.sh)
