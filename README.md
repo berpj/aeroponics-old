@@ -1,4 +1,4 @@
-# aeroponics
+# aeroponics (WIP)
 
 On Raspbian:
 
