@@ -37,6 +37,11 @@
     rect[fill="#F4B400"] {
       height: 100% !important;
     }
+    
+    .fa-green {
+      color: #9AC33C;
+      font-size: 1.1em !important;
+    }
   </style>
 </head>
 
@@ -46,6 +51,35 @@
     <div class="container">
       <div class="navbar-header">
         <a class="navbar-brand" href=""><i class="fa fa-leaf"></i> Aeroponics</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li style="font-size: 1.2em"><a href="">Health: <i class="fa fa-leaf fa-green"></i> <i class="fa fa-leaf fa-green"></i> <i class="fa fa-leaf fa-green"></i> <i class="fa fa-leaf"></i> <i class="fa fa-leaf"></i></a></li>
+          <li class="dropdown">
+            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+              <i class="fa fa-bell"></i>  <span class="label label-warning">2</span>
+            </a>
+            <ul class="dropdown-menu dropdown-alerts">
+              <li>
+                <a href="#">
+                  <div>
+                    Not enough nutrients
+                    <span class="pull-right text-muted small">35 minutes ago</span>
+                  </div>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="#">
+                  <div>
+                    Leafs are too hot
+                    <span class="pull-right text-muted small">1 day ago</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
@@ -180,6 +214,40 @@
     
     chart.draw(dataTable, options);
   }
+  
+  
+  google.setOnLoadCallback(drawChart4);
+    
+     function drawChart4() {
+
+       var data = google.visualization.arrayToDataTable([
+         ['Growth', 'Days'],
+         ['26 days',     26],
+         ['34 days', 34]
+       ]);
+
+       var options = {
+         pieHole: 0.6,
+         pieSliceText: 'label',
+         pieSliceTextStyle: {
+           color: 'black',
+         },
+         legend: 'none',
+         height: 240,
+         width: 240,
+         fontSize: 14,
+         pieSliceTextStyle: { color: 'white' },
+         pieSliceBorderColor: '999',
+         backgroundColor: 'transparent',
+         slices: {
+            0: { color: '9AC33C' },
+            1: { color: 'CCCCCC' }
+          }
+       };
+
+       var chart = new google.visualization.PieChart(document.getElementById('growth'));
+       chart.draw(data, options);
+     }
   </script>
   
   <div class="container" style="margin-top: 70px; margin-left: 2%!important; margin-right: 2%!important; width: 95%">
@@ -206,6 +274,11 @@
           <div id="relays"></div>
         </div>
       </div>
+    </div>
+    
+    <div style="padding: 15px; position: absolute; bottom: -15px; left: -25px">
+      <div id="growth"></div>
+      <p style="text-align: center; margin-top: -30px; color: white; font-weight: bold; z-index: 200; font-size: 1.15em">43%</p>
     </div>
     
   </div>
