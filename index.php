@@ -55,7 +55,48 @@
   
   function drawChart() {
     var data = google.visualization.arrayToDataTable([
-      ['Time', 'Leafs temperature (#1)', 'Roots temperature (#2)', 'Solution PH'],
+      ['Time', 'Leafs temperature (#1)', 'Roots temperature (#2)'],
+      <?php
+        date_default_timezone_set('Europe/Paris');
+        
+        $file = file("temp.txt");
+        $lines = array_slice($file, -288);
+        
+        $row = 0;
+        while (isset($lines[$row]))
+        {
+          $line = explode(',', $lines[$row]);
+          $legend = date('H:i', $line[0]);
+          
+          echo "['$legend', $line[1], $line[2]],\n";
+          $row++;
+        }
+      ?>
+    ]);
+    
+    var options = {
+      vAxis: {format:'0.00'},
+      curveType: 'function',
+      legend: { position: 'bottom' },
+      series: {
+        0: {targetAxisIndex: 0},
+        1: {targetAxisIndex: 0}
+      },
+      vAxes: {
+        0: {title: 'Temp. (°C)'}
+      }
+    };
+    
+    var chart = new google.visualization.LineChart(document.getElementById('temperatures'));
+    
+    chart.draw(data, options);
+  }
+  
+  google.setOnLoadCallback(drawChart);
+  
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Time', 'Solution PH', 'Solution EC'],
       <?php
         date_default_timezone_set('Europe/Paris');
         
@@ -74,7 +115,7 @@
             $fake_ph = $last_fake_ph + (rand(1 * 10, 1.1 * 10) / 10 - 1.052) + 1.08 * (6.4 / $last_fake_ph / 100);
           $last_fake_ph = $fake_ph;
           
-          echo "['$legend', $line[1], $line[2], $fake_ph],\n";
+          echo "['$legend', $fake_ph, 1.2],\n";
           $row++;
         }
       ?>
@@ -86,18 +127,44 @@
       legend: { position: 'bottom' },
       series: {
         0: {targetAxisIndex: 0},
-        1: {targetAxisIndex: 0},
-        2: {targetAxisIndex: 1}
+        1: {targetAxisIndex: 1}
       },
       vAxes: {
-        0: {title: 'Temp. (°C)'},
-        1: {title: 'PH', minValue: 0, maxValue:14}
+        0: {title: 'PH'},
+        1: {title: 'EC (mS/cm)', minValue: 0, maxValue:4}
       }
     };
     
     var chart = new google.visualization.LineChart(document.getElementById('temperatures'));
     
     chart.draw(data, options);
+  }
+  
+  google.setOnLoadCallback(drawChart);
+  
+  function drawChart() {
+    var container = document.getElementById('relays');
+    var chart = new google.visualization.Timeline(container);
+    var dataTable = new google.visualization.DataTable();
+    dataTable.addColumn({ type: 'string', id: 'Room' });
+    dataTable.addColumn({ type: 'string', id: 'Name' });
+    dataTable.addColumn({ type: 'date', id: 'Start' });
+    dataTable.addColumn({ type: 'date', id: 'End' });
+    dataTable.addRows([
+      [ 'Lamp (#1)', '',     new Date(0,0,0,8,0,0), new Date(0,0,0,22,0,0) ],
+      [ 'Lamp (#2)', '',     new Date(0,0,0,8,0,0), new Date(0,0,0,22,0,0) ],
+      <?php
+        for ($i = 0; $i < 24; $i++)
+          echo "[ 'Pomp', '', new Date(0,0,0,$i,0,0),  new Date(0,0,0,$i,30,0) ],";
+      ?>
+      [ '.', 'Now (<?php echo date('H:i') ?>)', new Date(0,0,0,<?php echo date('H,i') ?>,0), new Date(0,0,0,<?php echo date('H,i') ?>,0) ]
+    ]);
+    
+    var options = {
+      height: 300
+    };
+    
+    chart.draw(dataTable, options);
   }
   </script>
   
@@ -109,38 +176,16 @@
           <div id="temperatures" style="opacity: 0.9; min-height: 280px"></div>
         </div>
       </div>
-      <div class="col-md-6" style="padding: 15px">
-        
-        <script type="text/javascript">
-        google.setOnLoadCallback(drawChart);
-        
-        function drawChart() {
-          var container = document.getElementById('relays');
-          var chart = new google.visualization.Timeline(container);
-          var dataTable = new google.visualization.DataTable();
-          dataTable.addColumn({ type: 'string', id: 'Room' });
-          dataTable.addColumn({ type: 'string', id: 'Name' });
-          dataTable.addColumn({ type: 'date', id: 'Start' });
-          dataTable.addColumn({ type: 'date', id: 'End' });
-          dataTable.addRows([
-            [ 'Lamp (#1)', '',     new Date(0,0,0,8,0,0), new Date(0,0,0,22,0,0) ],
-            [ 'Lamp (#2)', '',     new Date(0,0,0,8,0,0), new Date(0,0,0,22,0,0) ],
-            <?php
-              for ($i = 0; $i < 24; $i++)
-                echo "[ 'Pomp', '', new Date(0,0,0,$i,0,0),  new Date(0,0,0,$i,30,0) ],";
-            ?>
-            [ '.', 'Now (<?php echo date('H:i') ?>)', new Date(0,0,0,<?php echo date('H,i') ?>,0), new Date(0,0,0,<?php echo date('H,i') ?>,0) ]
-          ]);
-          
-          var options = {
-            height: 300
-          };
-          
-          chart.draw(dataTable, options);
-        }
-        </script>
-        
+      <div class="col-md-6 col-md-offset-6" style="padding: 15px">
         <div style="background-color: white; padding: 10px; min-height: 360px!important">
+          <h4>Solution</h4>
+          <div id="solution"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 col-md-offset-6" style="padding: 15px">
+        <div style="background-color: white; padding: 10px">
           <h4>Relays</h4>
           <div id="relays"></div>
         </div>
