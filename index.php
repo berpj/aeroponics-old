@@ -51,15 +51,17 @@
   </nav>
   
   <script type="text/javascript">
-  google.setOnLoadCallback(drawChart);
+  google.setOnLoadCallback(drawChart1);
   
-  function drawChart() {
+  function drawChart1() {
     var data = google.visualization.arrayToDataTable([
-      ['Time', 'Leafs temperature (#1)', 'Roots temperature (#2)'],
+      ['Time', 'Leafs temperature (#1)', 'Roots temperature (#2)', 'Lumens'],
       <?php
         date_default_timezone_set('Europe/Paris');
         
-        $file = file("temp.txt");
+        if (!($file = file("temp.txt")))
+          $file = file("temp_demo.txt");
+        
         $lines = array_slice($file, -288);
         
         $row = 0;
@@ -68,7 +70,9 @@
           $line = explode(',', $lines[$row]);
           $legend = date('H:i', $line[0]);
           
-          echo "['$legend', $line[1], $line[2]],\n";
+          $fake_lumens = ($line[1] > 25) ? (420) : (35);
+          
+          echo "['$legend', $line[1], $line[2], $fake_lumens],\n";
           $row++;
         }
       ?>
@@ -80,27 +84,31 @@
       legend: { position: 'bottom' },
       series: {
         0: {targetAxisIndex: 0},
-        1: {targetAxisIndex: 0}
+        1: {targetAxisIndex: 0},
+        2: {targetAxisIndex: 1}
       },
       vAxes: {
-        0: {title: 'Temp. (°C)'}
+        0: {title: 'Temperature (ºC)'},
+        1: {title: 'Lumens', minValue: 0, maxValue:500}
       }
     };
     
-    var chart = new google.visualization.LineChart(document.getElementById('temperatures'));
+    var chart = new google.visualization.LineChart(document.getElementById('environment'));
     
     chart.draw(data, options);
   }
   
-  google.setOnLoadCallback(drawChart);
+  google.setOnLoadCallback(drawChart2);
   
-  function drawChart() {
+  function drawChart2() {
     var data = google.visualization.arrayToDataTable([
       ['Time', 'Solution PH', 'Solution EC'],
       <?php
         date_default_timezone_set('Europe/Paris');
         
-        $file = file("temp.txt");
+        if (!($file = file("temp.txt")))
+          $file = file("temp_demo.txt");
+          
         $lines = array_slice($file, -288);
         
         $row = 0;
@@ -115,7 +123,13 @@
             $fake_ph = $last_fake_ph + (rand(1 * 10, 1.1 * 10) / 10 - 1.052) + 1.08 * (6.4 / $last_fake_ph / 100);
           $last_fake_ph = $fake_ph;
           
-          echo "['$legend', $fake_ph, 1.2],\n";
+          if (!isset($fake_ec))
+            $fake_ec = 2;
+          else
+            $fake_ec = $last_fake_ec + (rand(1 * 10, 1.1 * 10) / 10 - 1.08) + 1.08 * (6.4 / $last_fake_ec / 100);
+          $last_fake_ec = $fake_ec;
+          
+          echo "['$legend', $fake_ph, $fake_ec],\n";
           $row++;
         }
       ?>
@@ -130,19 +144,19 @@
         1: {targetAxisIndex: 1}
       },
       vAxes: {
-        0: {title: 'PH'},
-        1: {title: 'EC (mS/cm)', minValue: 0, maxValue:4}
+        0: {title: 'PH', minValue: 0, maxValue:14},
+        1: {title: 'EC (mS/cm)', minValue: 0, maxValue:3}
       }
     };
     
-    var chart = new google.visualization.LineChart(document.getElementById('temperatures'));
+    var chart = new google.visualization.LineChart(document.getElementById('solution'));
     
     chart.draw(data, options);
   }
   
-  google.setOnLoadCallback(drawChart);
+  google.setOnLoadCallback(drawChart3);
   
-  function drawChart() {
+  function drawChart3() {
     var container = document.getElementById('relays');
     var chart = new google.visualization.Timeline(container);
     var dataTable = new google.visualization.DataTable();
@@ -161,7 +175,7 @@
     ]);
     
     var options = {
-      height: 300
+      height: 220
     };
     
     chart.draw(dataTable, options);
@@ -169,20 +183,22 @@
   </script>
   
   <div class="container" style="margin-top: 70px; margin-left: 2%!important; margin-right: 2%!important; width: 95%">
+    
     <div class="row">
       <div class="col-md-6" style="padding: 15px">
-        <div style="background-color: white; padding: 10px; min-height: 360px!important">
-          <h4>Temperatures</h4>
-          <div id="temperatures" style="opacity: 0.9; min-height: 280px"></div>
+        <div style="background-color: white; padding: 10px">
+          <h4>Environment</h4>
+          <div id="environment" style="opacity: 0.9; min-height: 250px"></div>
         </div>
       </div>
-      <div class="col-md-6 col-md-offset-6" style="padding: 15px">
-        <div style="background-color: white; padding: 10px; min-height: 360px!important">
+      <div class="col-md-6" style="padding: 15px">
+        <div style="background-color: white; padding: 10px">
           <h4>Solution</h4>
-          <div id="solution"></div>
+          <div id="solution" style="opacity: 0.9; min-height: 250px"></div>
         </div>
       </div>
     </div>
+    
     <div class="row">
       <div class="col-md-6 col-md-offset-6" style="padding: 15px">
         <div style="background-color: white; padding: 10px">
@@ -191,6 +207,7 @@
         </div>
       </div>
     </div>
+    
   </div>
   
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
